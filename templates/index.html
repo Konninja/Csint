@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSINT/CSINT/CLOSINT Intelligence Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-success">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <i class="bi bi-shield-fill-check me-2 text-success"></i>
+                <span class="fw-bold">INTEL<span class="text-success">DASH</span></span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link active" href="/"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/about"><i class="bi bi-info-circle me-1"></i> About</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://github.com" target="_blank">
+                            <i class="bi bi-github me-1"></i> GitHub
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container-fluid py-4">
+
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card bg-dark border-success">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap">
+                            <div>
+                                <h1 class="card-title h3 mb-1">
+                                    <i class="bi bi-diagram-3 text-success me-2"></i>
+                                    Intelligence Dashboard
+                                </h1>
+                                <p class="text-secondary mb-0 small">
+                                    OSINT · CSINT · CLOSINT — Multi-source intelligence for due diligence &amp; threat assessment
+                                </p>
+                            </div>
+                            <div class="mt-2 mt-md-0">
+                                <span class="badge bg-success me-1">OSINT</span>
+                                <span class="badge bg-warning text-dark me-1">CSINT</span>
+                                <span class="badge bg-danger">CLOSINT</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Row -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card bg-dark border-secondary">
+                    <div class="card-body">
+                        <form id="intelForm" class="row g-3 align-items-end">
+                            <div class="col-md-8">
+                                <label for="targetInput" class="form-label text-success fw-bold small">
+                                    <i class="bi bi-crosshair2 me-1"></i> TARGET
+                                </label>
+                                <input type="text" class="form-control form-control-lg bg-dark text-light border-secondary" 
+                                       id="targetInput" placeholder="IP address (8.8.8.8) · Domain (example.com) · Email (user@domain.com)" 
+                                       autocomplete="off" spellcheck="false">
+                                <div class="form-text text-secondary small">
+                                    Auto-detects IP, domain, or email. Runs all relevant intelligence modules.
+                                </div>
+                                <!-- Quick reference buttons -->
+                                <div class="mt-2 d-flex gap-1 flex-wrap">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary quick-target" data-target="8.8.8.8">8.8.8.8</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary quick-target" data-target="1.1.1.1">1.1.1.1</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary quick-target" data-target="google.com">google.com</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary quick-target" data-target="test@example.com">test@example.com</button>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label text-success fw-bold small">&nbsp;</label>
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-success btn-lg" id="searchBtn">
+                                        <i class="bi bi-search me-2"></i> GATHER INTEL
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Guide -->
+        <div class="row mb-4" id="initialState">
+            <div class="col-12">
+                <div class="card bg-dark border-secondary">
+                    <div class="card-body text-center py-5">
+                        <i class="bi bi-arrow-up-circle text-secondary" style="font-size: 3rem;"></i>
+                        <h4 class="text-secondary mt-3">Enter a target above to begin</h4>
+                        <p class="text-secondary small mb-3">Supported targets:</p>
+                        <div class="row justify-content-center">
+                            <div class="col-md-8">
+                                <div class="row g-2">
+                                    <div class="col-md-4">
+                                        <div class="border border-secondary rounded p-2">
+                                            <i class="bi bi-hdd-network text-success"></i>
+                                            <div class="small fw-bold text-light mt-1">IP Address</div>
+                                            <div class="small text-secondary">8.8.8.8</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="border border-secondary rounded p-2">
+                                            <i class="bi bi-globe text-warning"></i>
+                                            <div class="small fw-bold text-light mt-1">Domain</div>
+                                            <div class="small text-secondary">example.com</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="border border-secondary rounded p-2">
+                                            <i class="bi bi-envelope text-danger"></i>
+                                            <div class="small fw-bold text-light mt-1">Email</div>
+                                            <div class="small text-secondary">user@domain.com</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Area -->
+        <div id="resultsArea" style="display: none;">
+            <!-- Loading -->
+            <div class="row mb-4" id="loadingIndicator">
+                <div class="col-12">
+                    <div class="card bg-dark border-info">
+                        <div class="card-body text-center py-5">
+                            <div class="spinner-border text-info mb-3" role="status" style="width: 3rem; height: 3rem;">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <h5 class="text-info">Gathering Intelligence...</h5>
+                            <p class="text-secondary small mb-0">Querying multiple OSINT/CSINT/CLOSINT sources simultaneously</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Container -->
+            <div id="resultsContainer"></div>
+
+            <!-- Report Section -->
+            <div class="row mb-4" id="reportSection" style="display: none;">
+                <div class="col-12">
+                    <div class="card bg-dark border-secondary">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span class="fw-bold text-success">
+                                <i class="bi bi-file-text me-2"></i>COMBINED REPORT
+                            </span>
+                            <div>
+                                <button class="btn btn-sm btn-outline-success me-2" onclick="copyReport()">
+                                    <i class="bi bi-clipboard me-1"></i> Copy
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="downloadReport()">
+                                    <i class="bi bi-download me-1"></i> Download
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <textarea class="form-control bg-dark text-light border-secondary font-monospace" 
+                                      id="reportText" rows="12" readonly style="font-size: 0.8rem;"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="container-fluid py-3 border-top border-secondary mt-4">
+        <div class="row">
+            <div class="col-12 text-center">
+                <p class="text-secondary small mb-0">
+                    <i class="bi bi-shield-fill-check text-success me-1"></i>
+                    Intelligence Dashboard — OSINT · CSINT · CLOSINT
+                    <span class="mx-2">|</span>
+                    For authorized due diligence &amp; threat assessment only
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // ─── DOM References ──────────────────────────────────────────────
+    const intelForm = document.getElementById('intelForm');
+    const targetInput = document.getElementById('targetInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const resultsArea = document.getElementById('resultsArea');
+    const resultsContainer = document.getElementById('resultsContainer');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const reportSection = document.getElementById('reportSection');
+    const reportText = document.getElementById('reportText');
+    const initialState = document.getElementById('initialState');
+
+    // ─── Quick Reference Buttons ─────────────────────────────────────
+    document.querySelectorAll('.quick-target').forEach(btn => {
+        btn.addEventListener('click', function() {
+            targetInput.value = this.dataset.target;
+            intelForm.dispatchEvent(new Event('submit'));
+        });
+    });
+
+    // ─── Form Submission ─────────────────────────────────────────────
+    intelForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const target = targetInput.value.trim();
+        if (!target) return;
+
+        // Show loading
+        resultsArea.style.display = 'block';
+        loadingIndicator.style.display = 'block';
+        resultsContainer.innerHTML = '';
+        reportSection.style.display = 'none';
+        initialState.style.display = 'none';
+        searchBtn.disabled = true;
+        searchBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Searching...';
+
+        try {
+            const formData = new FormData();
+            formData.append('target', target);
+
+            const response = await fetch('/api/all', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            displayResults(data, target);
+        } catch (err) {
+            resultsContainer.innerHTML = `
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            Error: ${err.message}
+                        </div>
+                    </div>
+                </div>`;
+        } finally {
+            loadingIndicator.style.display = 'none';
+            searchBtn.disabled = false;
+            searchBtn.innerHTML = '<i class="bi bi-search me-2"></i> GATHER INTEL';
+        }
+    });
+
+    // ─── Display Results ─────────────────────────────────────────────
+    function displayResults(data, target) {
+        if (!data.success) {
+            resultsContainer.innerHTML = `
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            ${data.error || 'Unknown error'}
+                        </div>
+                    </div>
+                </div>`;
+            return;
+        }
+
+        const res = data.results;
+        const type = res.type || 'unknown';
+        let html = '';
+
+        // Target type badge
+        html += `
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card bg-dark border-secondary">
+                        <div class="card-body text-center py-3">
+                            <span class="badge bg-${type === 'ip' ? 'success' : type === 'domain' ? 'warning' : type === 'email' ? 'danger' : 'secondary'} me-2">
+                                ${type.toUpperCase()}
+                            </span>
+                            <span class="text-light fw-bold fs-5">${res.target}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+
+        // ── IP Results ──
+        if (type === 'ip' || res.geolocation) {
+            html += renderCard('IP Geolocation', 'globe', renderGeolocation(res.geolocation), 'success', res.geolocation);
+        }
+        if (type === 'ip' || res.reverse_dns) {
+            html += renderCard('Reverse DNS (PTR)', 'arrow-return-right', renderReverseDNS(res.reverse_dns), 'info', res.reverse_dns);
+        }
+        if (type === 'ip' || res.asn) {
+            html += renderCard('ASN / Network', 'hdd-network', renderASN(res.asn), 'warning', res.asn);
+        }
+        if (type === 'ip' || res.reverse_ip) {
+            html += renderCard('Reverse IP (Domains on Server)', 'diagram-3', renderReverseIP(res.reverse_ip), 'primary', res.reverse_ip);
+        }
+        if (res.abuseipdb) {
+            html += renderCard('AbuseIPDB Threat Intel', 'shield-exclamation', renderAbuseIPDB(res.abuseipdb), 'danger', res.abuseipdb);
+        }
+
+        // ── Domain Results ──
+        if (res.resolved_ip) {
+            html += renderCard('Resolved IP Address', 'arrow-right', renderResolvedIP(res.resolved_ip), 'info', res.resolved_ip);
+        }
+        if (res.dns) {
+            html += renderCard('DNS Records', 'server', renderDNS(res.dns), 'success', res.dns);
+        }
+        if (res.whois) {
+            html += renderCard('WHOIS / RDAP', 'info-circle', renderWHOIS(res.whois), 'warning', res.whois);
+        }
+        if (res.subdomains) {
+            html += renderCard('Subdomains (crt.sh)', 'layers', renderSubdomains(res.subdomains), 'primary', res.subdomains);
+        }
+        if (res.tech_stack) {
+            html += renderCard('Tech Stack Detection', 'cpu', renderTechStack(res.tech_stack), 'info', res.tech_stack);
+        }
+
+        // ── Email Results ──
+        if (res.reputation || res.email_reputation) {
+            const rep = res.reputation || res.email_reputation;
+            html += renderCard('Email Reputation', 'envelope', renderEmailRep(rep), 'warning', rep);
+        }
+        if (res.breaches) {
+            html += renderCard('Breach Detection (XposedOrNot)', 'exclamation-triangle', renderBreaches(res.breaches), 'danger', res.breaches);
+        }
+
+        // ── URLhaus ──
+        if (res.urlhaus) {
+            html += renderCard('URLhaus Malware Check', 'bug', renderURLhaus(res.urlhaus), 'danger', res.urlhaus);
+        }
+
+        // ── Domain info for email ──
+        if (res.domain_info) {
+            html += renderCard('Email Domain Info', 'globe2', renderEmailDomain(res.domain_info), 'secondary', res.domain_info);
+        }
+
+        resultsContainer.innerHTML = html;
+
+        // Build combined report
+        buildReport(data, target);
+        reportSection.style.display = 'block';
+    }
+
+    // ─── Card Renderer ───────────────────────────────────────────────
+    function renderCard(title, icon, content, color = 'secondary', rawData = null) {
+        const rawJson = rawData ? JSON.stringify(rawData, null, 2) : '';
+        return `
+            <div class="row mb-3">
+                <div class="col-12">
+                    <div class="card bg-dark border-${color}">
+                        <div class="card-header d-flex justify-content-between align-items-center py-2">
+                            <span class="fw-bold text-${color}">
+                                <i class="bi bi-${icon} me-2"></i>${title}
+                            </span>
+                            <button class="btn btn-sm btn-outline-${color}" 
+                                    onclick="toggleRaw('raw-${title.replace(/\\s+/g, '-').toLowerCase()}')">
+                                <i class="bi bi-json"></i> Raw
+                            </button>
+                        </div>
+                        <div class="card-body py-3">
+                            ${content}
+                            ${rawJson ? `
+                            <div id="raw-${title.replace(/\\s+/g, '-').toLowerCase()}" style="display: none;" class="mt-2">
+                                <textarea class="form-control bg-dark text-light border-secondary font-monospace" 
+                                          rows="6" readonly style="font-size: 0.75rem;">${escapeHtml(rawJson)}</textarea>
+                            </div>` : ''}
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+    }
+
+    // ─── Individual Module Renderers ─────────────────────────────────
+
+    function renderGeolocation(data) {
+        if (!data || !data.success) return `<div class="text-danger">${data?.error || 'No data'}</div>`;
+        const d = data.data;
+        return `
+            <div class="row g-2">
+                <div class="col-md-3"><small class="text-secondary">IP</small><div class="text-light">${d.query || '-'}</div></div>
+                <div class="col-md-3"><small class="text-secondary">Country</small><div class="text-light">${d.country || '-'} (${d.countryCode || '-'})</div></div>
+                <div class="col-md-3"><small class="text-secondary">Region / City</small><div class="text-light">${d.regionName || '-'} / ${d.city || '-'}</div></div>
+                <div class="col-md-3"><small class="text-secondary">ISP</small><div class="text-light">${d.isp || '-'}</div></div>
+                <div class="col-md-3"><small class="text-secondary">Organization</small><div class="text-light">${d.org || '-'}</div></div>
+                <div class="col-md-3"><small class="text-secondary">ASN</small><div class="text-light">${d.as || '-'}</div></div>
+                <div class="col-md-3"><small class="text-secondary">Time Zone</small><div class="text-light">${d.timezone || '-'}</div></div>
+                <div class="col-md-3"><small class="text-secondary">Coordinates</small><div class="text-light">${d.lat || '-'}, ${d.lon || '-'}</div></div>
+                ${d.proxy ? `<div class="col-12"><span class="badge bg-warning text-dark">⚠ Proxy / VPN Detected</span></div>` : ''}
+                ${d.mobile ? `<div class="col-12"><span class="badge bg-info">📱 Mobile Network</span></div>` : ''}
+                ${d.hosting ? `<div class="col-12"><span class="badge bg-secondary">☁ Hosting Provider</span></div>` : ''}
+            </div>`;
+    }
+
+    function renderReverseDNS(data) {
+        if (!data || !data.success) return `<div class="text-secondary">${data?.error || 'No PTR record'}</div>`;
+        const answers = data.data;
+        if (!answers || answers.length === 0) return `<div class="text-secondary">No PTR records found</div>`;
+        return answers.map(a => `<div class="text-light"><i class="bi bi-arrow-right text-info me-1"></i>${a.data}</div>`).join('');
+    }
+
+    function renderASN(data) {
+        if (!data || !data.success) return `<div class="text-secondary">${data?.error || 'No ASN data'}</div>`;
+        return `<pre class="text-light mb-0" style="font-size: 0.8rem; white-space: pre-wrap;">${escapeHtml(data.data)}</pre>`;
+    }
+
+    function renderReverseIP(data) {
+        if (!data || !data.success) return `<div class="text-secondary">${data?.error || 'No associated domains'}</div>`;
+        const domains = data.data;
+        if (!domains || domains.length === 0) return `<div class="text-secondary">No domains found on this IP</div>`;
+        if (domains.length > 50) {
+            return domains.slice(0, 50).map(d => `<div class="text-light"><i class="bi bi-globe text-primary me-1"></i>${d}</div>`).join('')
+                + `<div class="text-secondary mt-2">... and ${domains.length - 50} more (${domains.length} total)</div>`;
+        }
+        return domains.map(d => `<div class="text-light"><i class="bi bi-globe text-primary me-1"></i>${d}</div>`).join('');
+    }
+
+    function renderAbuseIPDB(data) {
+        if (!data || !data.success) return `<div class="text-secondary">${data?.error || 'API key not configured'}</div>`;
+        const d = data.data;
+        if (!d) return `<div class="text-secondary">No threat data</div>`;
+        const confidence = d.abuseConfidenceScore || 0;
+        const color = confidence > 75 ? 'danger' : confidence > 25 ? 'warning' : 'success';
+        return `
+            <div class="row g-2">
+                <div class="col-md-4"><small class="text-secondary">Abuse Confidence</small>
+                    <div class="text-${color} fw-bold">${confidence}%</div></div>
+                <div class="col-md-4"><small class="text-secondary">Total Reports</small>
+                    <div class="text-light">${d.totalReports || 0}</div></div>
+                <div class="col-md-4"><small class="text-secondary">Last Report</small>
+                    <div class="text-light">${d.lastReportedAt ? new Date(d.lastReportedAt).toLocaleString() : 'Never'}</div></div>
+                ${d.countryCode ? `<div class="col-md-3"><small class="text-secondary">Country</small><div class="text-light">${d.countryCode}</div></div>` : ''}
+                ${d.isp ? `<div class="col-md-3"><small class="text-secondary">ISP</small><div class="text-light">${d.isp}</div></div>` : ''}
+                ${d.domain ? `<div class="col-md-3"><small class="text-secondary">Domain</small><div class="text-light">${d.domain}</div></div>` : ''}
+                ${d.usageType ? `<div class="col-md-3"><small class="text-secondary">Usage</small><div class="text-light">${d.usageType}</div></div>` : ''}
+                ${d.isWhitelisted ? `<div class="col-12"><span class="badge bg-success">✓ Whitelisted</span></div>` : ''}
+            </div>`;
+    }
+
+    function renderResolvedIP(data) {
+        if (!data || !data.success) return `<div class="text-secondary">${data?.error || 'Could not resolve'}</div>`;
+        const d = data.data;
+        return `
+            <div class="text-light"><i class="bi bi-arrow-right text-info me-1"></i>${d.hostname}</div>
+            ${d.aliases && d.aliases.length ? d.aliases.map(a => `<div class="text-secondary ms-3"><i class="bi bi-arrow-return-right me-1"></i>${a}</div>`).join('') : ''}
+            ${d.addresses && d.addresses.length ? d.addresses.map(ip => `<div class="text-light ms-3"><i class="bi bi-hdd-network text-success me-1"></i>${ip}</div>`).join('') : ''}`;
+    }
+
+    function renderDNS(data) {
+        if (!data || !data.success) return `<div class="text-secondary">${data?.error || 'No DNS records'}</div>`;
+        const records = data.data;
+        const types = Object.keys(records);
+        if (types.length === 0) return `<div class="text-secondary">No DNS records found</div>`;
+        return types.map(type => `
+            <div class="mb-2">
+                <span class="badge bg-success me-2">${type}</span>
+                ${records[type].length ? records[type].map(r => `<span class="text-light me-3">${r.data || r}</span>`).join('') : '<span class="text-secondary">No records</span>'}
+            </div>
+        `).join('');
+    }
+
+    function renderWHOIS(data) {
+        if (!data || !data.success) return `<div class="text-secondary">${data?.error || 'No WHOIS data'}</div>`;
+        const out = typeof data.data === 'object' ? JSON.stringify(data.data, null, 2) : String(data.data);
+        return `<pre class="text-light mb-0" style="font-size: 0.75rem; white-space: pre-wrap; max-height: 300px; overflow-y: auto;">${escapeHtml(out)}</pre>`;
+    }
+
+    function renderSubdomains(data) {
+        if (!data || !data.success) return `<div class="text-secondary">${data?.error || 'No subdomains found'}</div>`;
+        const subs = data.data;
+        if (!subs || subs.length === 0) return `<div class="text-secondary">No subdomains found</div>`;
+        if (subs.length > 100) {
+            return subs.slice(0, 100).map(s => `<div class="text-light small"><i class="bi bi-globe text-primary me-1"></i>${s}</div>`).join('')
+                + `<div class="text-secondary mt-2">... and ${subs.length - 100} more (${subs.length} total)</div>`;
+        }
+        return subs.map(s => `<div class="text-light small"><i class="bi bi-globe text-primary me-1"></i>${s}</div>`).join('');
+    }
+
+    function renderTechStack(data) {
+        if (!data || !data.success) return `<div class="text-secondary">${data?.error || 'Could not detect'}</div>`;
+        const d = data.data;
+        return `
+            <div class="mb-2">
+                ${d.technologies && d.technologies.length 
+                    ? d.technologies.map(t => `<span class="badge bg-info me-1 mb-1">${t}</span>`).join('')
+                    : '<span class="text-secondary">No specific technologies detected</span>'}
+            </div>
+            <div class="small text-secondary">Status: ${d.status_code} | Final URL: ${d.final_url}</div>
+            ${d.security_headers && d.security_headers.length 
+                ? `<div class="mt-1 small">${d.security_headers.map(h => `<span class="badge bg-dark border border-secondary me-1">${h}</span>`).join('')}</div>` 
+                : ''}
+            ${d.note ? `<div class="text-warning small mt-1"><i class="bi bi-exclamation-circle me-1"></i>${d.note}</div>` : ''}`;
+    }
+
+    function renderEmailRep(data) {
+        if (!data || !data.success) return `<div class="text-secondary">${data?.error || 'No reputation data'}</div>`;
+        const d = data.data;
+        const rep = d.reputation ? d.reputation.toLowerCase() : 'unknown';
+        const color = rep === 'high' ? 'danger' : rep === 'medium' ? 'warning' : 'success';
+        return `
+            <div class="row g-2">
+                <div class="col-md-4"><small class="text-secondary">Reputation</small>
+                    <div class="text-${color} fw-bold">${d.reputation || 'Unknown'}</div></div>
+                <div class="col-md-4"><small class="text-secondary">Suspicious</small>
+                    <div class="${d.suspicious ? 'text-danger' : 'text-success'}">${d.suspicious ? '⚠ Yes' : '✓ No'}</div></div>
+                <div class="col-md-4"><small class="text-secondary">References</small>
+                    <div class="text-light">${d.references || 0}</div></div>
+                ${d.details?.blacklisted ? `<div class="col-12"><span class="badge bg-danger">Blacklisted</span></div>` : ''}
+                ${d.details?.malicious_activity ? `<div class="col-12"><span class="badge bg-danger">Malicious Activity Detected</span></div>` : ''}
+                ${d.details?.credentials_leaked ? `<div class="col-12"><span class="badge bg-warning text-dark">Credentials Leaked</span></div>` : ''}
+                ${d.details?.data_breach ? `<div class="col-12"><span class="badge bg-warning text-dark">Involved in Data Breach</span></div>` : ''}
+                ${d.details?.spam ? `<div class="col-12"><span class="badge bg-warning text-dark">Spam Activity</span></div>` : ''}
+                ${d.details?.domain_risk ? `<div class="col-12"><span class="badge bg-warning text-dark">High Risk Domain</span></div>` : ''}
+            </div>
+            ${d.details?.profiles && d.details.profiles.length 
+                ? `<div class="mt-2"><small class="text-secondary">Public Profiles:</small> ${d.details.profiles.map(p => `<span class="badge bg-dark border border-info me-1">${p}</span>`).join('')}</div>`
+                : ''}`;
+    }
+
+    function renderBreaches(data) {
+        if (!data || !data.success) return `<div class="text-secondary">${data?.error || 'Could not check breaches'}</div>`;
+        const d = data.data;
+        const breaches = d.breaches || [];
+        const pastes = d.pastes || [];
+
+        let html = `<div class="mb-2"><strong class="text-light">Breaches: ${d.total_breaches || 0}</strong> | <strong class="text-light">Pastes: ${d.total_pastes || 0}</strong></div>`;
+
+        if (breaches.length) {
+            html += breaches.slice(0, 10).map(b => `
+                <div class="border border-${b.name ? 'danger' : 'secondary'} rounded p-2 mb-1">
+                    <div class="fw-bold text-light">${b.name || 'Unknown'}</div>
+                    <div class="small text-secondary">
+                        ${b.domain ? `Domain: ${b.domain}` : ''}
+                        ${b.date ? ` | Date: ${new Date(b.date).toLocaleDateString()}` : ''}
+                        ${b.count ? ` | Records: ${b.count.toLocaleString()}` : ''}
+                    </div>
+                    ${b.data_classes && b.data_classes.length ? `<div class="small text-secondary mt-1">Data: ${b.data_classes.join(', ')}</div>` : ''}
+                </div>
+            `).join('');
+            if (breaches.length > 10) {
+                html += `<div class="text-secondary small">... and ${breaches.length - 10} more breaches</div>`;
+            }
+        } else {
+            html += `<div class="text-success"><i class="bi bi-check-circle me-1"></i>No breaches found</div>`;
+        }
+
+        if (pastes.length) {
+            html += `<div class="mt-2"><strong class="text-light">Recent Pastes:</strong></div>`;
+            html += pastes.slice(0, 5).map(p => `
+                <div class="text-light small"><i class="bi bi-file-text text-secondary me-1"></i>${p.source || 'Unknown'} ${p.date ? `(${new Date(p.date).toLocaleDateString()})` : ''}</div>
+            `).join('');
+        }
+
+        return html;
+    }
+
+    function renderURLhaus(data) {
+        if (!data || !data.success) return `<div class="text-secondary">${data?.error || 'API key not configured'}</div>`;
+        const d = data.data;
+        if (d.query_status === 'no_results') return `<div class="text-success"><i class="bi bi-check-circle me-1"></i>No malware reports found</div>`;
+        if (!d.url) return `<div class="text-success">${d.note || 'Clean'}</div>`;
+        return `
+            <div class="text-danger fw-bold"><i class="bi bi-exclamation-triangle me-1"></i>Malware Reported</div>
+            <div class="text-light small mt-1">URL: ${d.url || '-'}</div>
+            ${d.threat ? `<div class="text-light small">Threat: ${d.threat}</div>` : ''}
+            ${d.date_added ? `<div class="text-light small">Added: ${new Date(d.date_added).toLocaleString()}</div>` : ''}
+            ${d.url_status ? `<div class="text-light small">Status: ${d.url_status}</div>` : ''}
+            ${d.tags && d.tags.length ? `<div class="mt-1">${d.tags.map(t => `<span class="badge bg-danger me-1">${t}</span>`).join('')}</div>` : ''}`;
+    }
+
+    function renderEmailDomain(data) {
+        if (!data) return `<div class="text-secondary">No data</div>`;
+        const resolved = data.resolved;
+        return `
+            <div class="text-light"><strong>Domain:</strong> ${data.domain || '-'}</div>
+            ${resolved && resolved.success 
+                ? `<div class="text-light small mt-1"><strong>Resolved IPs:</strong> ${(resolved.data.addresses || []).join(', ')}</div>`
+                : `<div class="text-secondary small mt-1">${resolved?.error || 'Could not resolve'}</div>`}
+        `;
+    }
+
+    // ─── Combined Report Builder ─────────────────────────────────────
+    function buildReport(data, target) {
+        const res = data.results;
+        const type = res.type || 'unknown';
+        let lines = [];
+        lines.push('═══════════════════════════════════════════════════════════');
+        lines.push('  INTELLIGENCE DASHBOARD — COMBINED REPORT');
+        lines.push('═══════════════════════════════════════════════════════════');
+        lines.push('');
+        lines.push(`Target:    ${target}`);
+        lines.push(`Type:      ${type.toUpperCase()}`);
+        lines.push(`Time:      ${new Date().toISOString()}`);
+        lines.push('─────────────────────────────────────────────────────────');
+        lines.push('');
+
+        if (res.geolocation && res.geolocation.success) {
+            const g = res.geolocation.data;
+            lines.push('[IP GEOLOCATION]');
+            lines.push(`  IP:         ${g.query || '-'}`);
+            lines.push(`  Country:    ${g.country || '-'} (${g.countryCode || '-'})`);
+            lines.push(`  Region:     ${g.regionName || '-'}`);
+            lines.push(`  City:       ${g.city || '-'}`);
+            lines.push(`  ISP:        ${g.isp || '-'}`);
+            lines.push(`  Org:        ${g.org || '-'}`);
+            lines.push(`  ASN:        ${g.as || '-'}`);
+            lines.push(`  Timezone:   ${g.timezone || '-'}`);
+            lines.push(`  Coordinates: ${g.lat || '-'}, ${g.lon || '-'}`);
+            lines.push(`  Proxy:      ${g.proxy ? 'YES' : 'No'}`);
+            lines.push(`  Hosting:    ${g.hosting ? 'YES' : 'No'}`);
+            lines.push('');
+        }
+
+        if (res.reverse_dns && res.reverse_dns.success && res.reverse_dns.data) {
+            lines.push('[REVERSE DNS]');
+            (res.reverse_dns.data || []).forEach(r => lines.push(`  ${r.data || r}`));
+            lines.push('');
+        }
+
+        if (res.asn && res.asn.success) {
+            lines.push('[ASN / NETWORK]');
+            lines.push(`  ${res.asn.data}`);
+            lines.push('');
+        }
+
+        if (res.reverse_ip && res.reverse_ip.success && res.reverse_ip.data) {
+            lines.push('[REVERSE IP]');
+            (res.reverse_ip.data || []).slice(0, 20).forEach(d => lines.push(`  ${d}`));
+            if (res.reverse_ip.data.length > 20) lines.push(`  ... and ${res.reverse_ip.data.length - 20} more`);
+            lines.push('');
+        }
+
+        if (res.dns && res.dns.success) {
+            lines.push('[DNS RECORDS]');
+            Object.entries(res.dns.data).forEach(([type, records]) => {
+                lines.push(`  ${type}: ${records.map(r => r.data || r).join(', ')}`);
+            });
+            lines.push('');
+        }
+
+        if (res.whois && res.whois.success) {
+            lines.push('[WHOIS / RDAP]');
+            const whoisStr = typeof res.whois.data === 'object' ? JSON.stringify(res.whois.data, null, 2) : String(res.whois.data);
+            whoisStr.split('\n').forEach(l => lines.push(`  ${l}`));
+            lines.push('');
+        }
+
+        if (res.subdomains && res.subdomains.success && res.subdomains.data) {
+            lines.push('[SUBDOMAINS (crt.sh)]');
+            (res.subdomains.data || []).slice(0, 30).forEach(s => lines.push(`  ${s}`));
+            if (res.subdomains.data.length > 30) lines.push(`  ... and ${res.subdomains.data.length - 30} more`);
+            lines.push('');
+        }
+
+        if (res.tech_stack && res.tech_stack.success) {
+            lines.push('[TECH STACK]');
+            const tech = res.tech_stack.data;
+            (tech.technologies || []).forEach(t => lines.push(`  ${t}`));
+            lines.push(`  Status: ${tech.status_code} | ${tech.final_url}`);
+            if (tech.security_headers && tech.security_headers.length) {
+                lines.push(`  Security Headers: ${tech.security_headers.join(', ')}`);
+            }
+            lines.push('');
+        }
+
+        if (res.abuseipdb && res.abuseipdb.success) {
+            const a = res.abuseipdb.data;
+            lines.push('[ABUSEIPDB THREAT INTEL]');
+            lines.push(`  Abuse Score:  ${a.abuseConfidenceScore || 0}%`);
+            lines.push(`  Reports:      ${a.totalReports || 0}`);
+            lines.push(`  Last Report:  ${a.lastReportedAt || 'Never'}`);
+            lines.push('');
+        }
+
+        if (res.email_reputation && res.email_reputation.success) {
+            const e = res.email_reputation.data;
+            lines.push('[EMAIL REPUTATION]');
+            lines.push(`  Reputation:  ${e.reputation || 'Unknown'}`);
+            lines.push(`  Suspicious:  ${e.suspicious || false}`);
+            lines.push(`  Blacklisted: ${e.details?.blacklisted || false}`);
+            lines.push(`  Malicious:   ${e.details?.malicious_activity || false}`);
+            lines.push(`  Breach:      ${e.details?.data_breach || false}`);
+            lines.push(`  Spam:        ${e.details?.spam || false}`);
+            lines.push('');
+        }
+
+        if (res.breaches && res.breaches.success) {
+            const b = res.breaches.data;
+            lines.push('[BREACH DETECTION]');
+            lines.push(`  Total Breaches: ${b.total_breaches || 0}`);
+            (b.breaches || []).slice(0, 5).forEach(br => {
+                lines.push(`  - ${br.name} (${br.date || '?'}): ${br.count || '?'} records`);
+            });
+            lines.push(`  Total Pastes: ${b.total_pastes || 0}`);
+            lines.push('');
+        }
+
+        if (res.urlhaus && res.urlhaus.success) {
+            const u = res.urlhaus.data;
+            lines.push('[URLHAUS MALWARE CHECK]');
+            if (u.query_status === 'no_results') {
+                lines.push('  No malware reports found');
+            } else {
+                lines.push(`  URL:   ${u.url || '-'}`);
+                lines.push(`  Threat: ${u.threat || '-'}`);
+                lines.push(`  Status: ${u.url_status || '-'}`);
+                lines.push(`  Tags:   ${(u.tags || []).join(', ')}`);
+            }
+            lines.push('');
+        }
+
+        if (res.resolved_ip && res.resolved_ip.success) {
+            const r = res.resolved_ip.data;
+            lines.push('[RESOLVED IP]');
+            (r.addresses || []).forEach(ip => lines.push(`  ${ip}`));
+            lines.push('');
+        }
+
+        if (res.domain_info) {
+            lines.push('[EMAIL DOMAIN]');
+            lines.push(`  Domain: ${res.domain_info.domain || '-'}`);
+            if (res.domain_info.resolved?.success) {
+                (res.domain_info.resolved.data.addresses || []).forEach(ip => lines.push(`  IP: ${ip}`));
+            }
+            lines.push('');
+        }
+
+        lines.push('═══════════════════════════════════════════════════════════');
+        lines.push('  Report generated by Intelligence Dashboard');
+        lines.push('  OSINT · CSINT · CLOSINT');
+        lines.push('═══════════════════════════════════════════════════════════');
+
+        reportText.value = lines.join('\n');
+    }
+
+    // ─── Utility Functions ───────────────────────────────────────────
+    function toggleRaw(id) {
+        const el = document.getElementById(id);
+        if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function copyReport() {
+        reportText.select();
+        navigator.clipboard.writeText(reportText.value).then(() => {
+            const btn = event.target.closest('button');
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-check-lg me-1"></i> Copied!';
+            setTimeout(() => btn.innerHTML = orig, 2000);
+        }).catch(() => {
+            document.execCommand('copy');
+        });
+    }
+
+    function downloadReport() {
+        const blob = new Blob([reportText.value], { type: 'text/plain' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `intel-report-${targetInput.value.trim()}-${new Date().toISOString().slice(0,10)}.txt`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    // ─── Enter key submits ───────────────────────────────────────────
+    targetInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') intelForm.dispatchEvent(new Event('submit'));
+    });
+    </script>
+</body>
+</html>
