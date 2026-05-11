@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSINT/CSINT/CLOSINT Dashboard — Methodology</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                🛡️ INTEL DASHBOARD <small>OSINT · CSINT · CLOSINT</small>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/about">Methodology</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="about-container">
+
+            <h2>📖 Intelligence Framework</h2>
+            <p>
+                This platform consolidates three distinct intelligence collection disciplines into a single, 
+                unified dashboard. Designed for private investors and commercial due diligence, it enables 
+                rapid reconnaissance of digital assets, entities, and infrastructure.
+            </p>
+
+            <div class="methodology-card" style="border-left: 3px solid var(--accent-blue);">
+                <h4><span class="icon">🌐</span> OSINT <span class="intel-badge osint">OPEN SOURCE</span></h4>
+                <p><strong>Open Source Intelligence</strong> — Collection from publicly available sources with no authentication required.</p>
+                <ul>
+                    <li><strong>Geolocation</strong> — IP address mapping to continent, country, region, city, coordinates, ISP, and ASN via ip-api.com</li>
+                    <li><strong>DNS Records</strong> — A, AAAA, MX, NS, TXT, CNAME resolution via Google DNS over HTTPS (RFC 8484)</li>
+                    <li><strong>WHOIS / RDAP</strong> — Domain registration data including registrant, dates, name servers via who-dat.as93.net</li>
+                    <li><strong>Subdomain Enumeration</strong> — Certificate transparency log querying via crt.sh</li>
+                </ul>
+            </div>
+
+            <div class="methodology-card" style="border-left: 3px solid var(--accent-amber);">
+                <h4><span class="icon">📊</span> CSINT <span class="intel-badge csint">COMMERCIAL SIGNALS</span></h4>
+                <p><strong>Commercial Signals Intelligence</strong> — Collection from semi-public or rate-limited sources that may 
+                require registration or API keys but are freely available.</p>
+                <ul>
+                    <li><strong>Email Reputation</strong> — Known spam, phishing, or malicious activity reports via emailrep.io</li>
+                    <li><strong>Data Breach Exposure</strong> — Credential leaks and past compromise checks via XposedOrNot</li>
+                    <li><strong>Technology Profiling</strong> — HTTP header analysis, SSL certificate examination, and framework detection</li>
+                    <li><strong>Reverse IP Lookup</strong> — Other domains hosted on the same IP address via HackerTarget</li>
+                </ul>
+            </div>
+
+            <div class="methodology-card" style="border-left: 3px solid var(--accent-purple);">
+                <h4><span class="icon">🔒</span> CLOSINT <span class="intel-badge closint">CLOSED INDICATORS</span></h4>
+                <p><strong>Closed Intelligence</strong> — Collection from curated threat intelligence platforms that aggregate 
+                confirmed malicious indicators from closed communities and automated systems.</p>
+                <ul>
+                    <li><strong>AbuseIPDB</strong> — IP address abuse reports, confidence scores, and report categories (requires free API key)</li>
+                    <li><strong>URLhaus</strong> — Malware URL and hostname lookup against the abuse.ch threat feed (requires free API key)</li>
+                </ul>
+            </div>
+
+            <h2>🎯 Use Cases</h2>
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <div class="methodology-card">
+                        <h4>🏢 Investment Due Diligence</h4>
+                        <p>Evaluate the digital footprint and infrastructure posture of target companies before 
+                        acquisition or investment. Identify hosting providers, technology stacks, and potential 
+                        security liabilities.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="methodology-card">
+                        <h4>🕵️ Competitive Intelligence</h4>
+                        <p>Map competitor digital infrastructure, identify subdomains, discover connected services, 
+                        and profile technology choices to inform strategic positioning.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="methodology-card">
+                        <h4>🔐 Risk Assessment</h4>
+                        <p>Check email domains for breach exposure, evaluate IP address reputation, and identify 
+                        associations with malicious infrastructure through threat intelligence feeds.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="methodology-card">
+                        <h4>📋 Background Verification</h4>
+                        <p>Verify domain ownership, registration details, hosting locations, and infrastructure 
+                        history to validate claims made by counterparties or partners.</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2>⚙️ Technical Architecture</h2>
+            <div class="methodology-card">
+                <h4>Backend Stack</h4>
+                <ul>
+                    <li><strong>Framework:</strong> Python 3.11 + Flask (WSGI via Gunicorn)</li>
+                    <li><strong>API Layer:</strong> RESTful JSON endpoints, smart target auto-detection</li>
+                    <li><strong>External Integrations:</strong> 10+ free intelligence APIs with fallback handling</li>
+                    <li><strong>Deployment:</strong> Render free tier (web service)</li>
+                </ul>
+                <h4 class="mt-3">Frontend Stack</h4>
+                <ul>
+                    <li><strong>UI Framework:</strong> Bootstrap 5.3 with dark theme</li>
+                    <li><strong>Typography:</strong> Inter (UI) + JetBrains Mono (data)</li>
+                    <li><strong>Interactivity:</strong> Vanilla JavaScript with async API calls</li>
+                    <li><strong>Data Presentation:</strong> Structured cards with copy-paste textareas</li>
+                </ul>
+            </div>
+
+            <h2>📡 Supported Queries</h2>
+            <div class="methodology-card">
+                <div class="table-responsive">
+                    <table class="table table-dark table-borderless table-sm">
+                        <thead>
+                            <tr>
+                                <th>Target Type</th>
+                                <th>Example Inputs</th>
+                                <th>Modules Triggered</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>IPv4 Address</td>
+                                <td><code>8.8.8.8</code> <code>185.220.101.1</code></td>
+                                <td>Geolocation, AbuseIPDB, ASN, Reverse IP, Hostname</td>
+                            </tr>
+                            <tr>
+                                <td>Domain Name</td>
+                                <td><code>example.com</code> <code>github.io</code></td>
+                                <td>DNS Records, Subdomains, WHOIS, Tech Profile, Threat</td>
+                            </tr>
+                            <tr>
+                                <td>Email Address</td>
+                                <td><code>user@example.com</code></td>
+                                <td>Reputation, Breach Check</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <h2>📊 Rate Limits &amp; Fair Use</h2>
+            <div class="methodology-card">
+                <div class="table-responsive">
+                    <table class="table table-dark table-borderless table-sm">
+                        <thead>
+                            <tr>
+                                <th>Service</th>
+                                <th>Limit</th>
+                                <th>API Key Required?</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>ip-api.com</td><td>45 req/min (free endpoint)</td><td>No</td></tr>
+                            <tr><td>Google DNS (DoH)</td><td>Unlimited (fair use)</td><td>No</td></tr>
+                            <tr><td>crt.sh</td><td>No official limit</td><td>No</td></tr>
+                            <tr><td>who-dat.as93.net</td><td>Unlimited (open source)</td><td>No</td></tr>
+                            <tr><td>emailrep.io</td><td>10/day (no key), 250/mo (free key)</td><td>Optional</td></tr>
+                            <tr><td>XposedOrNot</td><td>Unlimited</td><td>No</td></tr>
+                            <tr><td>HackerTarget</td><td>50 queries/day</td><td>No</td></tr>
+                            <tr><td>AbuseIPDB</td><td>1,000 checks/day</td><td>Yes (free)</td></tr>
+                            <tr><td>URLhaus</td><td>Fair use</td><td>Yes (free)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="mt-2 mb-0" style="font-size:0.85rem; color:var(--text-muted);">
+                    All services listed are free-tier endpoints. For commercial or high-volume use, consult 
+                    each provider's terms of service and consider paid upgrades where applicable.
+                </p>
+            </div>
+
+            <h2>📜 Legal &amp; Ethics</h2>
+            <div class="methodology-card">
+                <p>
+                    This tool is designed for <strong>legitimate intelligence gathering</strong> — including due diligence, 
+                    security research, competitive analysis, and threat assessment — against targets you have 
+                    authorization to investigate or that are publicly available information.
+                </p>
+                <p>
+                    <strong>Users are responsible</strong> for complying with all applicable laws and regulations 
+                    in their jurisdiction, including but not limited to data protection regulations (GDPR, CCPA, etc.), 
+                    computer misuse legislation, and terms of service of queried platforms.
+                </p>
+                <p class="mb-0" style="color:var(--accent-amber);">
+                    ⚠️ This tool does <em>not</em> perform any intrusive scanning, exploitation, or denial of service. 
+                    It queries public APIs and publicly indexed data only.
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p class="mb-1">OSINT / CSINT / CLOSINT Intelligence Dashboard</p>
+            <p class="mb-0">
+                Built with Flask &middot; 
+                <a href="https://github.com" target="_blank" rel="noopener">Source</a> &middot; 
+                Deploy on <a href="https://render.com" target="_blank" rel="noopener">Render</a>
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
