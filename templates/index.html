@@ -1,328 +1,961 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OSINT/CSINT/CLOSINT Intelligence Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSINT Intelligence Dashboard</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0e27;
+            --bg-card: #12163a;
+            --bg-card-hover: #1a1f4e;
+            --accent-primary: #00d4ff;
+            --accent-secondary: #7c3aed;
+            --accent-success: #10b981;
+            --accent-warning: #f59e0b;
+            --accent-danger: #ef4444;
+            --text-muted: #8892b0;
+            --border-color: #1e2954;
+            --glow-primary: 0 0 20px rgba(0,212,255,0.15);
+        }
+
+        body {
+            background: var(--bg-dark);
+            color: #e2e8f0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: rgba(10,14,39,0.95) !important;
+            border-bottom: 1px solid var(--border-color);
+            backdrop-filter: blur(12px);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.4rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            border-color: rgba(0,212,255,0.3);
+            box-shadow: var(--glow-primary);
+        }
+
+        .card-header {
+            background: rgba(0,0,0,0.3);
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            padding: 0.75rem 1.25rem;
+        }
+
+        .search-section {
+            background: linear-gradient(135deg, rgba(18,22,58,0.9), rgba(10,14,39,0.9));
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .input-group-custom .form-control {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid var(--border-color);
+            color: #e2e8f0;
+            padding: 0.8rem 1.2rem;
+            font-size: 1.05rem;
+            border-radius: 10px 0 0 10px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group-custom .form-control:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(0,212,255,0.1);
+            background: rgba(255,255,255,0.08);
+        }
+
+        .input-group-custom .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), #0ea5e9);
+            border: none;
+            padding: 0.8rem 1.8rem;
+            font-weight: 600;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .input-group-custom .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0,212,255,0.3);
+        }
+
+        .badge-type {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .badge-tool {
+            background: rgba(0,212,255,0.1);
+            color: var(--accent-primary);
+            border: 1px solid rgba(0,212,255,0.2);
+            padding: 0.3rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin: 0.15rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .badge-tool:hover {
+            background: rgba(0,212,255,0.2);
+            transform: translateY(-1px);
+        }
+
+        .example-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .example-btn:hover {
+            background: rgba(0,212,255,0.1);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        /* Tool Result Card */
+        .tool-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            margin-bottom: 0.75rem;
+            overflow: hidden;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .tool-card:hover {
+            border-color: rgba(0,212,255,0.25);
+        }
+
+        .tool-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1.25rem;
+            cursor: pointer;
+            user-select: none;
+            background: rgba(0,0,0,0.2);
+            border-bottom: 1px solid transparent;
+            transition: background 0.2s;
+        }
+
+        .tool-card-header:hover {
+            background: rgba(0,0,0,0.35);
+        }
+
+        .tool-card-header.expanded {
+            border-bottom-color: var(--border-color);
+        }
+
+        .tool-card-header .tool-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tool-card-header .tool-status {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .tool-status.success {
+            background: rgba(16,185,129,0.15);
+            color: var(--accent-success);
+            border: 1px solid rgba(16,185,129,0.3);
+        }
+
+        .tool-status.error {
+            background: rgba(239,68,68,0.15);
+            color: var(--accent-danger);
+            border: 1px solid rgba(239,68,68,0.3);
+        }
+
+        .tool-status.pending {
+            background: rgba(245,158,11,0.15);
+            color: var(--accent-warning);
+            border: 1px solid rgba(245,158,11,0.3);
+        }
+
+        .tool-status.empty {
+            background: rgba(136,146,176,0.15);
+            color: var(--text-muted);
+            border: 1px solid rgba(136,146,176,0.3);
+        }
+
+        .tool-card-body {
+            padding: 0 1.25rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s ease, padding 0.35s ease;
+        }
+
+        .tool-card-body.open {
+            max-height: 2000px;
+            padding: 1rem 1.25rem;
+        }
+
+        .tool-card-body pre {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(30,41,84,0.5);
+            border-radius: 8px;
+            padding: 1rem;
+            font-size: 0.8rem;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            color: #e2e8f0;
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 0;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .tool-card-body pre::-webkit-scrollbar {
+            width: 5px;
+        }
+        .tool-card-body pre::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+            border-radius: 3px;
+        }
+        .tool-card-body pre::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        /* Key-value result rows */
+        .result-row {
+            display: flex;
+            padding: 0.4rem 0;
+            border-bottom: 1px solid rgba(30,41,84,0.3);
+            font-size: 0.85rem;
+        }
+        .result-row:last-child {
+            border-bottom: none;
+        }
+        .result-key {
+            color: var(--text-muted);
+            min-width: 180px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            flex-shrink: 0;
+        }
+        .result-value {
+            color: #e2e8f0;
+            word-break: break-word;
+        }
+        .result-value.string { color: var(--accent-success); }
+        .result-value.number { color: var(--accent-primary); }
+        .result-value.boolean-true { color: var(--accent-success); }
+        .result-value.boolean-false { color: var(--accent-danger); }
+        .result-value.null { color: var(--text-muted); font-style: italic; }
+        .result-value.array { color: var(--accent-warning); }
+        .result-value.object { color: var(--accent-secondary); }
+
+        /* Summary bar */
+        .summary-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
+            padding: 1rem 1.25rem;
+            background: rgba(18,22,58,0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+        }
+
+        .summary-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.8rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(30,41,84,0.4);
+        }
+
+        .summary-item .count {
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .summary-item.success .count { color: var(--accent-success); }
+        .summary-item.error .count { color: var(--accent-danger); }
+        .summary-item.pending .count { color: var(--accent-warning); }
+        .summary-item.total .count { color: var(--accent-primary); }
+
+        /* Search chips for tools */
+        .tool-filter-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            margin-bottom: 1rem;
+        }
+
+        .tool-filter-chip {
+            font-size: 0.72rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background: rgba(255,255,255,0.03);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tool-filter-chip:hover,
+        .tool-filter-chip.active {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+            background: rgba(0,212,255,0.08);
+        }
+
+        .tool-filter-chip.success { border-left: 3px solid var(--accent-success); }
+        .tool-filter-chip.error { border-left: 3px solid var(--accent-danger); }
+        .tool-filter-chip.pending { border-left: 3px solid var(--accent-warning); }
+
+        /* Empty state */
+        .empty-state-card {
+            background: rgba(18,22,58,0.5);
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 3rem 1.5rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .empty-state-card:hover {
+            border-color: rgba(0,212,255,0.2);
+        }
+
+        .empty-state-icon {
+            font-size: 2.5rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .target-type-card {
+            background: rgba(18,22,58,0.7);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .target-type-card:hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-2px);
+            box-shadow: var(--glow-primary);
+        }
+
+        .spinner-custom {
+            width: 2.5rem;
+            height: 2.5rem;
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .auto-detect-badge {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+        }
+
+        .copy-btn, .download-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 0.3rem 0.7rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover, .download-btn:hover {
+            background: rgba(0,212,255,0.1);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        /* Module count badge */
+        .module-count-badge {
+            font-size: 0.75rem;
+            background: rgba(0,212,255,0.1);
+            color: var(--accent-primary);
+            border: 1px solid rgba(0,212,255,0.2);
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+        }
+
+        /* Tool tiping dots */
+        .typing-dots::after {
+            content: '';
+            animation: dots 1.5s steps(3, end) infinite;
+        }
+        @keyframes dots {
+            0%   { content: ''; }
+            33%  { content: '.'; }
+            66%  { content: '..'; }
+            100% { content: '...'; }
+        }
+    </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-secondary">
+    <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="/">
-                <i class="bi bi-shield-fill-check me-2"></i>INTEL DASH
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-shield-hal me-2"></i>CSINT Dashboard
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link active" href="/"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/about"><i class="bi bi-book me-1"></i>About</a></li>
-                    <li class="nav-item"><a class="nav-link" href="https://github.com/Konninja/Csint" target="_blank"><i class="bi bi-github me-1"></i>GitHub</a></li>
-                </ul>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge-type">
+                    <i class="fas fa-robot me-1"></i>OSINT · CSINT · CLOSINT
+                </span>
             </div>
         </div>
     </nav>
 
-    <main class="container py-4">
-        <!-- Header -->
-        <div class="text-center mb-4">
-            <h1 class="display-5 fw-bold"><i class="bi bi-shield-fill-check me-2"></i>Intelligence Dashboard</h1>
-            <p class="text-secondary-emphasis lead">OSINT &middot; CSINT &middot; CLOSINT &mdash; Multi-source intelligence for due diligence &amp; threat assessment</p>
-            <div class="d-flex justify-content-center gap-2 mt-3">
-                <span class="badge bg-primary fs-6 px-3 py-2">OSINT</span>
-                <span class="badge bg-success fs-6 px-3 py-2">CSINT</span>
-                <span class="badge bg-danger fs-6 px-3 py-2">CLOSINT</span>
-            </div>
-        </div>
+    <div class="container py-4">
+        <!-- Search Section -->
+        <div class="search-section">
+            <h4 class="mb-3">
+                <i class="fas fa-search me-2" style="color: var(--accent-primary);"></i>
+                Intelligence Query
+            </h4>
+            <p class="text-muted mb-3" style="font-size: 0.9rem;">
+                Auto-detects IP addresses, domains, emails, phone numbers, and usernames.
+                Runs all applicable OSINT/CSINT modules in parallel.
+            </p>
 
-        <!-- Search Card -->
-        <div class="row justify-content-center mb-4">
-            <div class="col-lg-8 col-xl-7">
-                <div class="card border-secondary shadow-sm">
-                    <div class="card-body p-4">
-                        <div class="mb-3">
-                            <label for="targetInput" class="form-label fw-semibold">
-                                <i class="bi bi-crosshair me-1"></i>TARGET
-                            </label>
-                            <input
-                                type="text"
-                                id="targetInput"
-                                class="form-control form-control-lg bg-dark text-light border-secondary"
-                                placeholder="8.8.8.8, example.com, user@domain.com"
-                                autocomplete="off"
-                                spellcheck="false"
-                            />
-                            <div class="form-text text-secondary-emphasis mt-2">
-                                Auto-detects IP, domain, or email. Runs all relevant intelligence modules.
-                            </div>
-                        </div>
-                        <div class="d-flex flex-wrap gap-2 mb-3">
-                            <button class="btn btn-sm btn-outline-secondary quick-target" data-target="8.8.8.8">8.8.8.8</button>
-                            <button class="btn btn-sm btn-outline-secondary quick-target" data-target="1.1.1.1">1.1.1.1</button>
-                            <button class="btn btn-sm btn-outline-secondary quick-target" data-target="google.com">google.com</button>
-                            <button class="btn btn-sm btn-outline-secondary quick-target" data-target="test@example.com">test@example.com</button>
-                        </div>
-                        <button id="gatherBtn" class="btn btn-primary btn-lg w-100 fw-semibold">
-                            <i class="bi bi-search me-2"></i>GATHER INTEL
-                        </button>
-                    </div>
+            <div class="position-relative">
+                <div class="input-group input-group-custom">
+                    <input type="text" id="targetInput" class="form-control"
+                           placeholder="Enter IP, domain, email, phone (+1...), or username..."
+                           autocomplete="off">
+                    <button class="btn btn-primary" onclick="runAll()">
+                        <i class="fas fa-bolt me-2"></i>Scan
+                    </button>
                 </div>
+                <div class="auto-detect-badge" id="autoDetectBadge" style="display:none;">
+                    <span class="badge-type" id="detectLabel"></span>
+                </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 mt-3 align-items-center">
+                <span class="text-muted" style="font-size: 0.85rem;">Examples:</span>
+                <button class="example-btn" onclick="fillExample('8.8.8.8')">
+                    <i class="fas fa-globe me-1"></i>8.8.8.8
+                </button>
+                <button class="example-btn" onclick="fillExample('example.com')">
+                    <i class="fas fa-globe me-1"></i>example.com
+                </button>
+                <button class="example-btn" onclick="fillExample('test@example.com')">
+                    <i class="fas fa-envelope me-1"></i>test@example.com
+                </button>
+                <button class="example-btn" onclick="fillExample('+14155552671')">
+                    <i class="fas fa-phone me-1"></i>+14155552671
+                </button>
+                <button class="example-btn" onclick="fillExample('john_doe')">
+                    <i class="fas fa-user me-1"></i>john_doe
+                </button>
             </div>
         </div>
 
         <!-- Loading Indicator -->
-        <div id="loadingIndicator" class="text-center my-4 d-none">
-            <div class="spinner-border text-primary mb-3" role="status" style="width:3rem;height:3rem;">
-                <span class="visually-hidden">Loading...</span>
+        <div id="loadingIndicator" class="text-center py-5" style="display:none;">
+            <div class="spinner-custom mx-auto mb-3"></div>
+            <p class="text-muted" id="loadingStatus">Running intelligence sweep...</p>
+            <div class="progress" style="height: 4px; max-width: 300px; margin: 0 auto; background: var(--border-color);">
+                <div class="progress-bar" style="width: 100%; background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary)); animation: progress-bar-stripes 1s linear infinite;"></div>
             </div>
-            <h5 class="fw-semibold">Gathering Intelligence...</h5>
-            <p class="text-secondary-emphasis">Querying multiple OSINT/CSINT/CLOSINT sources simultaneously</p>
-        </div>
-
-        <!-- Error Alert -->
-        <div id="errorAlert" class="alert alert-danger d-none" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i><span id="errorMessage"></span>
-        </div>
-
-        <!-- Results Area -->
-        <div id="resultsArea" class="d-none">
-            <!-- Combined Report -->
-            <div class="card border-secondary mb-4">
-                <div class="card-header bg-dark border-secondary d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 fw-semibold"><i class="bi bi-file-earmark-text me-2"></i>COMBINED REPORT</h5>
-                    <div>
-                        <button id="copyBtn" class="btn btn-sm btn-outline-light me-2"><i class="bi bi-clipboard me-1"></i>Copy</button>
-                        <button id="downloadBtn" class="btn btn-sm btn-outline-light"><i class="bi bi-download me-1"></i>Download</button>
-                    </div>
-                </div>
-                <div class="card-body p-0">
-                    <textarea id="reportText" class="form-control bg-dark text-light border-0 rounded-0 font-monospace" style="min-height:300px;resize:vertical;font-size:0.85rem;" readonly></textarea>
-                </div>
+            <div class="mt-2">
+                <span class="badge-tool" id="loadingModuleCount">0 / 0 modules</span>
             </div>
-
-            <!-- Structured Result Cards -->
-            <div id="resultCards" class="row g-3"></div>
         </div>
+
+        <!-- Error Message -->
+        <div id="errorMessage" class="alert alert-danger" style="display:none; border-radius: 10px;">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <span id="errorText"></span>
+            <button type="button" class="btn-close float-end" onclick="document.getElementById('errorMessage').style.display='none'" style="filter: invert(1);"></button>
+        </div>
+
+        <!-- Results Container -->
+        <div id="resultsContainer"></div>
 
         <!-- Empty State -->
-        <div id="emptyState" class="text-center py-5">
-            <i class="bi bi-search text-secondary" style="font-size:4rem;"></i>
-            <h4 class="mt-3 fw-semibold">Enter a target above to begin</h4>
-            <p class="text-secondary-emphasis">Supported targets:</p>
-            <div class="d-flex justify-content-center gap-4 flex-wrap">
-                <div class="text-center">
-                    <div class="badge bg-info text-dark fs-6 px-3 py-2 mb-1"><i class="bi bi-globe me-1"></i>IP Address</div>
-                    <div class="text-secondary-emphasis small">8.8.8.8</div>
-                </div>
-                <div class="text-center">
-                    <div class="badge bg-info text-dark fs-6 px-3 py-2 mb-1"><i class="bi bi-globe2 me-1"></i>Domain</div>
-                    <div class="text-secondary-emphasis small">example.com</div>
-                </div>
-                <div class="text-center">
-                    <div class="badge bg-info text-dark fs-6 px-3 py-2 mb-1"><i class="bi bi-envelope me-1"></i>Email</div>
-                    <div class="text-secondary-emphasis small">user@domain.com</div>
+        <div id="emptyState">
+            <div class="row g-3">
+                <div class="col-12">
+                    <div class="empty-state-card">
+                        <div class="empty-state-icon">
+                            <i class="fas fa-satellite-dish"></i>
+                        </div>
+                        <h5 class="mb-2">Ready to Investigate</h5>
+                        <p class="text-muted mb-4" style="font-size: 0.9rem;">
+                            Enter a target above to begin OSINT reconnaissance.
+                            The dashboard auto-detects the target type and runs all applicable modules.
+                        </p>
+                        <div class="row g-2 justify-content-center">
+                            <div class="col-auto">
+                                <div class="target-type-card" onclick="fillExample('8.8.8.8')">
+                                    <i class="fas fa-network-wired mb-2" style="color: var(--accent-primary); font-size: 1.5rem;"></i>
+                                    <div style="font-size: 0.85rem;">IP Address</div>
+                                    <small class="text-muted">Geolocation, DNS, Ports, RDAP, Shodan</small>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="target-type-card" onclick="fillExample('example.com')">
+                                    <i class="fas fa-globe mb-2" style="color: var(--accent-success); font-size: 1.5rem;"></i>
+                                    <div style="font-size: 0.85rem;">Domain</div>
+                                    <small class="text-muted">Whois, DNS, SSL, Certificates, Subdomains</small>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="target-type-card" onclick="fillExample('test@example.com')">
+                                    <i class="fas fa-envelope mb-2" style="color: var(--accent-warning); font-size: 1.5rem;"></i>
+                                    <div style="font-size: 0.85rem;">Email</div>
+                                    <small class="text-muted">Breach check, Verify, HIBP, Hunter</small>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="target-type-card" onclick="fillExample('+14155552671')">
+                                    <i class="fas fa-phone mb-2" style="color: var(--accent-secondary); font-size: 1.5rem;"></i>
+                                    <div style="font-size: 0.85rem;">Phone</div>
+                                    <small class="text-muted">Carrier, Format, Location, Reputation</small>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="target-type-card" onclick="fillExample('john_doe')">
+                                    <i class="fas fa-user mb-2" style="color: #ec4899; font-size: 1.5rem;"></i>
+                                    <div style="font-size: 0.85rem;">Username</div>
+                                    <small class="text-muted">35+ Social Platforms</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </main>
+    </div>
 
-    <footer class="bg-dark border-top border-secondary py-3 mt-4">
-        <div class="container text-center text-secondary-emphasis small">
-            Intelligence Dashboard &mdash; OSINT &middot; CSINT &middot; CLOSINT | For authorized due diligence &amp; threat assessment only
-        </div>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        (function() {
-            'use strict';
+        let currentResults = null;
+        let debounceTimer = null;
 
-            const DOM = {
-                targetInput: document.getElementById('targetInput'),
-                gatherBtn: document.getElementById('gatherBtn'),
-                loadingIndicator: document.getElementById('loadingIndicator'),
-                errorAlert: document.getElementById('errorAlert'),
-                errorMessage: document.getElementById('errorMessage'),
-                resultsArea: document.getElementById('resultsArea'),
-                emptyState: document.getElementById('emptyState'),
-                reportText: document.getElementById('reportText'),
-                resultCards: document.getElementById('resultCards'),
-                copyBtn: document.getElementById('copyBtn'),
-                downloadBtn: document.getElementById('downloadBtn'),
-                quickTargets: document.querySelectorAll('.quick-target')
+        // ─── Auto-detect on input ───────────────────────────────────────────
+        document.getElementById('targetInput').addEventListener('input', function() {
+            const val = this.value.trim();
+            const badge = document.getElementById('autoDetectBadge');
+            const label = document.getElementById('detectLabel');
+
+            clearTimeout(debounceTimer);
+            if (val.length < 3) {
+                badge.style.display = 'none';
+                return;
+            }
+
+            debounceTimer = setTimeout(() => {
+                fetch(`/api/classify?target=${encodeURIComponent(val)}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.type) {
+                            const icons = {
+                                ip: 'fa-network-wired',
+                                domain: 'fa-globe',
+                                email: 'fa-envelope',
+                                phone: 'fa-phone',
+                                username: 'fa-user'
+                            };
+                            label.innerHTML = `<i class="fas ${icons[data.type] || 'fa-question'} me-1"></i>${data.type}`;
+                            badge.style.display = 'block';
+                        }
+                    })
+                    .catch(() => {});
+            }, 300);
+        });
+
+        // Enter key
+        document.getElementById('targetInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') runAll();
+        });
+
+        function fillExample(value) {
+            document.getElementById('targetInput').value = value;
+            runAll();
+        }
+
+        // ─── Main scan ──────────────────────────────────────────────────────
+        function runAll() {
+            const target = document.getElementById('targetInput').value.trim();
+            if (!target) return;
+
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('loadingIndicator').style.display = 'block';
+            document.getElementById('loadingStatus').textContent = 'Running intelligence sweep...';
+            document.getElementById('resultsContainer').innerHTML = '';
+
+            fetch(`/api/all?target=${encodeURIComponent(target)}`)
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('loadingIndicator').style.display = 'none';
+                    if (data.error) {
+                        showError(data.error);
+                        return;
+                    }
+                    currentResults = data;
+                    renderResults(data);
+                })
+                .catch(err => {
+                    document.getElementById('loadingIndicator').style.display = 'none';
+                    showError('Connection error: ' + err.message);
+                });
+        }
+
+        function showError(msg) {
+            document.getElementById('errorText').textContent = msg;
+            document.getElementById('errorMessage').style.display = 'block';
+        }
+
+        // ─── Render results ─────────────────────────────────────────────────
+        function renderResults(data) {
+            const container = document.getElementById('resultsContainer');
+            const { target, type, results } = data;
+
+            const typeIcons = {
+                ip: 'fa-network-wired',
+                domain: 'fa-globe',
+                email: 'fa-envelope',
+                phone: 'fa-phone',
+                username: 'fa-user'
             };
 
-            // Quick-target buttons
-            DOM.quickTargets.forEach(function(btn) {
-                btn.addEventListener('click', function(e) {
-                    DOM.targetInput.value = this.getAttribute('data-target');
-                    doSearch();
-                });
-            });
-
-            // Enter key on input
-            DOM.targetInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') doSearch();
-            });
-
-            // Gather button
-            DOM.gatherBtn.addEventListener('click', doSearch);
-
-            // Copy button
-            DOM.copyBtn.addEventListener('click', function() {
-                DOM.reportText.select();
-                document.execCommand('copy');
-                const orig = this.innerHTML;
-                this.innerHTML = '<i class="bi bi-check-lg me-1"></i>Copied!';
-                var btn = this;
-                setTimeout(function() { btn.innerHTML = orig; }, 2000);
-            });
-
-            // Download button
-            DOM.downloadBtn.addEventListener('click', function() {
-                const text = DOM.reportText.value;
-                const blob = new Blob([text], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'csint-report.json';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            });
-
-            // Main search function
-            function doSearch() {
-                const target = DOM.targetInput.value.trim();
-                if (!target) {
-                    showError('Please enter a target (IP, domain, or email).');
-                    return;
-                }
-
-                // Hide everything, show loading
-                DOM.emptyState.classList.add('d-none');
-                DOM.errorAlert.classList.add('d-none');
-                DOM.resultsArea.classList.add('d-none');
-                DOM.loadingIndicator.classList.remove('d-none');
-
-                fetch('/api/all', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ target: target })
-                })
-                .then(function(response) {
-                    if (!response.ok) {
-                        return response.json().then(function(err) {
-                            throw new Error(err.error || 'Server error (' + response.status + ')');
-                        });
+            // Compute summary stats
+            let successCount = 0, errorCount = 0, pendingCount = 0, emptyCount = 0, totalCount = 0;
+            if (results && typeof results === 'object') {
+                const entries = Object.entries(results);
+                totalCount = entries.length;
+                for (const [, toolData] of entries) {
+                    if (!toolData || (typeof toolData === 'object' && Object.keys(toolData).length === 0)) {
+                        emptyCount++;
+                    } else if (toolData.error) {
+                        errorCount++;
+                    } else if (toolData.status === 'pending') {
+                        pendingCount++;
+                    } else {
+                        successCount++;
                     }
-                    return response.json();
-                })
-                .then(function(data) {
-                    DOM.loadingIndicator.classList.add('d-none');
-
-                    // Display JSON report
-                    const pretty = JSON.stringify(data, null, 2);
-                    DOM.reportText.value = pretty;
-
-                    // Build structured cards
-                    renderCards(data);
-
-                    DOM.resultsArea.classList.remove('d-none');
-                })
-                .catch(function(err) {
-                    DOM.loadingIndicator.classList.add('d-none');
-                    showError(err.message || 'An unexpected error occurred. Please try again.');
-                });
-            }
-
-            function showError(msg) {
-                DOM.errorMessage.textContent = msg;
-                DOM.errorAlert.classList.remove('d-none');
-            }
-
-            function renderCards(data) {
-                DOM.resultCards.innerHTML = '';
-
-                // Target type badge
-                const typeLabel = data.type || 'unknown';
-                const typeBadgeColor = typeLabel === 'ip' ? 'info' : (typeLabel === 'domain' ? 'success' : 'warning');
-
-                // Summary card
-                var summaryHtml = '<div class="col-12">' +
-                    '<div class="card border-secondary h-100">' +
-                    '<div class="card-header bg-dark border-secondary"><h6 class="mb-0 fw-semibold"><i class="bi bi-info-circle me-1"></i>Summary</h6></div>' +
-                    '<div class="card-body">' +
-                    '<p class="mb-1"><strong>Target:</strong> ' + escapeHtml(data.target) + '</p>' +
-                    '<p class="mb-0"><strong>Type:</strong> <span class="badge bg-' + typeBadgeColor + '">' + typeLabel.toUpperCase() + '</span></p>' +
-                    '</div></div></div>';
-                DOM.resultCards.insertAdjacentHTML('beforeend', summaryHtml);
-
-                // Render each section based on data type
-                var sections = [];
-
-                if (data.geolocation) sections.push({ title: 'Geolocation', icon: 'bi-geo-alt', data: data.geolocation });
-                if (data.abuse) sections.push({ title: 'Abuse Report', icon: 'bi-shield-exclamation', data: data.abuse });
-                if (data.asn) sections.push({ title: 'ASN Info', icon: 'bi-diagram-3', data: data.asn });
-                if (data.reverse_ip) sections.push({ title: 'Reverse IP', icon: 'bi-arrow-return-left', data: data.reverse_ip });
-                if (data.dns_records) sections.push({ title: 'DNS Records', icon: 'bi-hdd-network', data: data.dns_records });
-                if (data.subdomains) sections.push({ title: 'Subdomains', icon: 'bi-layers', data: data.subdomains });
-                if (data.whois) sections.push({ title: 'WHOIS', icon: 'bi-file-earmark-text', data: data.whois });
-                if (data.tech_stack) sections.push({ title: 'Tech Stack', icon: 'bi-cpu', data: data.tech_stack });
-                if (data.reputation) sections.push({ title: 'Email Reputation', icon: 'bi-shield-check', data: data.reputation });
-                if (data.breaches) sections.push({ title: 'Breach Check', icon: 'bi-exclamation-triangle', data: data.breaches });
-                if (data.urlhaus) sections.push({ title: 'URLhaus', icon: 'bi-bug', data: data.urlhaus });
-                if (data.domain_info) sections.push({ title: 'Domain Info', icon: 'bi-globe2', data: data.domain_info });
-                if (data.ip_address) {
-                    sections.push({
-                        title: 'Resolved IP',
-                        icon: 'bi-hdd',
-                        data: { ip_address: data.ip_address }
-                    });
-                }
-                if (data.associated_domains) {
-                    sections.push({
-                        title: 'Associated Domains',
-                        icon: 'bi-link-45deg',
-                        data: { domains: data.associated_domains }
-                    });
-                }
-
-                sections.forEach(function(section) {
-                    var cardHtml = '<div class="col-md-6 col-lg-4">' +
-                        '<div class="card border-secondary h-100">' +
-                        '<div class="card-header bg-dark border-secondary py-2">' +
-                        '<h6 class="mb-0 fw-semibold small"><i class="bi ' + section.icon + ' me-1"></i>' + section.title + '</h6>' +
-                        '</div>' +
-                        '<div class="card-body p-2">' +
-                        '<pre class="mb-0 font-monospace text-light" style="font-size:0.75rem;white-space:pre-wrap;word-break:break-all;max-height:250px;overflow-y:auto;">' +
-                        escapeHtml(JSON.stringify(section.data, null, 2)) +
-                        '</pre>' +
-                        '</div></div></div>';
-                    DOM.resultCards.insertAdjacentHTML('beforeend', cardHtml);
-                });
-
-                // If no sections matched
-                if (sections.length === 0) {
-                    DOM.resultCards.insertAdjacentHTML('beforeend',
-                        '<div class="col-12"><div class="card border-secondary"><div class="card-body text-center text-secondary-emphasis">No structured data available.</div></div></div>'
-                    );
                 }
             }
 
-            function escapeHtml(str) {
-                var div = document.createElement('div');
-                div.appendChild(document.createTextNode(str));
-                return div.innerHTML;
+            // Determine the list of tool names for filter chips
+            const toolNames = results ? Object.keys(results) : [];
+
+            // ─── HEADER ─────────────────────────────────────────────────────
+            let html = `
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <div>
+                        <h4 class="mb-0">
+                            <i class="fas ${typeIcons[type] || 'fa-search'} me-2" style="color: var(--accent-primary);"></i>
+                            ${escapeHtml(target)}
+                        </h4>
+                        <span class="badge-type mt-1 d-inline-block">
+                            <i class="fas ${typeIcons[type] || 'fa-search'} me-1"></i>${escapeHtml(type)}
+                        </span>
+                        <span class="module-count-badge ms-2">${totalCount} modules</span>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="copy-btn" onclick="copyResults()">
+                            <i class="fas fa-copy me-1"></i>Copy
+                        </button>
+                        <button class="download-btn" onclick="downloadResults()">
+                            <i class="fas fa-download me-1"></i>JSON
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // ─── SUMMARY BAR ────────────────────────────────────────────────
+            html += `
+                <div class="summary-bar">
+                    <div class="summary-item total">
+                        <i class="fas fa-cube" style="color: var(--accent-primary);"></i>
+                        Total: <span class="count">${totalCount}</span>
+                    </div>
+                    <div class="summary-item success">
+                        <i class="fas fa-check-circle" style="color: var(--accent-success);"></i>
+                        Success: <span class="count">${successCount}</span>
+                    </div>
+                    <div class="summary-item error">
+                        <i class="fas fa-exclamation-circle" style="color: var(--accent-danger);"></i>
+                        Errors: <span class="count">${errorCount}</span>
+                    </div>
+                    <div class="summary-item pending">
+                        <i class="fas fa-hourglass-half" style="color: var(--accent-warning);"></i>
+                        Pending: <span class="count">${pendingCount}</span>
+                    </div>
+                    <div class="summary-item" style="border-color: rgba(136,146,176,0.3);">
+                        <i class="fas fa-empty-set" style="color: var(--text-muted);"></i>
+                        Empty: <span class="count" style="color: var(--text-muted);">${emptyCount}</span>
+                    </div>
+                </div>
+            `;
+
+            // ─── TOOL FILTER CHIPS ──────────────────────────────────────────
+            if (toolNames.length > 10) {
+                html += `<div class="tool-filter-chips mb-3" id="toolFilterChips">`;
+                html += `<span class="text-muted" style="font-size:0.75rem;margin-right:0.25rem;">Filter:</span>`;
+                html += `<span class="tool-filter-chip active" onclick="filterTools('all')" data-filter="all">All (${totalCount})</span>`;
+                html += `<span class="tool-filter-chip success" onclick="filterTools('success')" data-filter="success">Success (${successCount})</span>`;
+                html += `<span class="tool-filter-chip error" onclick="filterTools('error')" data-filter="error">Error (${errorCount})</span>`;
+                html += `<span class="tool-filter-chip pending" onclick="filterTools('pending')" data-filter="pending">Pending (${pendingCount})</span>`;
+                html += `</div>`;
             }
 
-        })();
+            // ─── TOOL RESULT CARDS ─────────────────────────────────────────
+            html += `<div id="toolCardsContainer">`;
+
+            for (const [toolName, toolData] of Object.entries(results || {})) {
+                const isEmpty = !toolData || (typeof toolData === 'object' && Object.keys(toolData).length === 0);
+                const isError = toolData && toolData.error;
+                const isPending = toolData && toolData.status === 'pending';
+
+                let statusClass = 'success';
+                let statusLabel = 'Success';
+                if (isEmpty) { statusClass = 'empty'; statusLabel = 'Empty'; }
+                else if (isError) { statusClass = 'error'; statusLabel = 'Error'; }
+                else if (isPending) { statusClass = 'pending'; statusLabel = 'Pending'; }
+
+                const toolIcon = getToolIcon(toolName);
+
+                html += `
+                    <div class="tool-card" data-tool="${escapeHtml(toolName)}" data-status="${statusClass}">
+                        <div class="tool-card-header" onclick="toggleToolCard(this)">
+                            <div class="tool-name">
+                                <i class="fas ${toolIcon}" style="color: var(--accent-primary); width: 1.2rem;"></i>
+                                <span>${escapeHtml(formatToolName(toolName))}</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="tool-status ${statusClass}">${statusLabel}</span>
+                                <i class="fas fa-chevron-down" style="color: var(--text-muted); font-size: 0.75rem; transition: transform 0.3s;"></i>
+                            </div>
+                        </div>
+                        <div class="tool-card-body">
+                            ${renderToolBody(toolData, isEmpty, isError)}
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += `</div>`; // end toolCardsContainer
+
+            container.innerHTML = html;
+        }
+
+        // ─── Render individual tool body ────────────────────────────────────
+        function renderToolBody(toolData, isEmpty, isError) {
+            if (isEmpty) {
+                return `<p class="text-muted mb-0" style="font-size: 0.85rem;"><i class="fas fa-inbox me-1"></i>No data returned from this module.</p>`;
+            }
+
+            if (isError) {
+                const errMsg = typeof toolData.error === 'string' ? toolData.error : JSON.stringify(toolData.error, null, 2);
+                return `
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="fas fa-exclamation-triangle" style="color: var(--accent-danger); margin-top: 0.15rem;"></i>
+                        <div>
+                            <p class="mb-1" style="color: var(--accent-danger); font-weight: 600; font-size: 0.85rem;">Module Error</p>
+                            <pre style="color: var(--accent-danger);">${escapeHtml(errMsg)}</pre>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // If it's a flat key-value object (most OSINT tools return this)
+            if (typeof toolData === 'object' && !Array.isArray(toolData) && toolData !== null) {
+                const keys = Object.keys(toolData);
+                if (keys.length > 0 && keys.every(k => typeof toolData[k] !== 'object' || toolData[k] === null || Array.isArray(toolData[k]))) {
+                    // Render as key-value rows
+                    let rows = '<div style="font-size: 0.85rem;">';
+                    for (const [key, val] of Object.entries(toolData)) {
+                        const displayVal = formatValue(val);
+                        const valClass = getValueClass(val);
+                        rows += `
+                            <div class="result-row">
+                                <span class="result-key">${escapeHtml(key)}</span>
+                                <span class="result-value ${valClass}">${displayVal}</span>
+                            </div>
+                        `;
+                    }
+                    rows += '</div>';
+                    return rows;
+                }
+            }
+
+            // Fallback: pretty-printed JSON
+            return `<pre>${escapeHtml(JSON.stringify(toolData, null, 2))}</pre>`;
+        }
+
+        // ─── Helpers ────────────────────────────────────────────────────────
+        function formatToolName(name) {
+            return name
+                .replace(/_/g, ' ')
+                .replace(/-/g, ' ')
+                .replace(/\b\w/g, c => c.toUpperCase());
+        }
+
+        function getToolIcon(name) {
+            const lower = name.toLowerCase();
+            if (lower.includes('ip') || lower.includes('geo')) return 'fa-globe-americas';
+            if (lower.includes('dns') || lower.includes('whois')) return 'fa-network-wired';
+            if (lower.includes('port') || lower.includes('shodan')) return 'fa-plug';
+            if (lower.includes('email') || lower.includes('mail') || lower.includes('hunter')) return 'fa-envelope';
+            if (lower.includes('breach') || lower.includes('hibp') || lower.includes('leak')) return 'fa-shield-hal';
+            if (lower.includes('phone') || lower.includes('carrier')) return 'fa-phone';
+            if (lower.includes('social') || lower.includes('username') || lower.includes('github') || lower.includes('twitter')) return 'fa-users';
+            if (lower.includes('cert') || lower.includes('ssl') || lower.includes('tls')) return 'fa-lock';
+            if (lower.includes('subdomain')) return 'fa-sitemap';
+            if (lower.includes('header') || lower.includes('http')) return 'fa-code';
+            if (lower.includes('screenshot') || lower.includes('screen')) return 'fa-camera';
+            return 'fa-puzzle-piece';
+        }
+
+        function getValueClass(val) {
+            if (val === null || val === undefined) return 'null';
+            if (typeof val === 'boolean') return val ? 'boolean-true' : 'boolean-false';
+            if (typeof val === 'number') return 'number';
+            if (typeof val === 'string') return 'string';
+            if (Array.isArray(val)) return 'array';
+            return 'object';
+        }
+
+        function formatValue(val) {
+            if (val === null || val === undefined) return 'null';
+            if (typeof val === 'boolean') return val ? 'true' : 'false';
+            if (typeof val === 'number') return val.toString();
+            if (typeof val === 'string') return escapeHtml(val);
+            if (Array.isArray(val)) {
+                if (val.length === 0) return '<span class="text-muted">[]</span>';
+                return `[${val.map(v => typeof v === 'string' ? `"${escapeHtml(v)}"` : formatValue(v)).join(', ')}]`;
+            }
+            if (typeof val === 'object') {
+                const keys = Object.keys(val);
+                if (keys.length === 0) return '<span class="text-muted">{}</span>';
+                return `<span class="text-muted">{${keys.length} keys}</span>`;
+            }
+            return escapeHtml(String(val));
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // ─── Toggle tool card expansion ─────────────────────────────────────
+        function toggleToolCard(headerEl) {
+            const body = headerEl.nextElementSibling;
+            const icon = headerEl.querySelector('.fa-chevron-down');
+            const isOpen = body.classList.contains('open');
+
+            body.classList.toggle('open');
+            headerEl.classList.toggle('expanded');
+            if (icon) {
+                icon.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+            }
+        }
+
+        // ─── Filter tools by status ─────────────────────────────────────────
+        function filterTools(status) {
+            // Update chip active state
+            document.querySelectorAll('.tool-filter-chip').forEach(chip => {
+                chip.classList.toggle('active', chip.dataset.filter === status);
+            });
+
+            document.querySelectorAll('.tool-card').forEach(card => {
+                if (status === 'all') {
+                    card.style.display = '';
+                } else {
+                    card.style.display = card.dataset.status === status ? '' : 'none';
+                }
+            });
+        }
+
+        // ─── Copy results ───────────────────────────────────────────────────
+        function copyResults() {
+            if (!currentResults) return;
+            const text = JSON.stringify(currentResults, null, 2);
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                const orig = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
+                setTimeout(() => btn.innerHTML = orig, 2000);
+            }).catch(() => {
+                // Fallback
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+            });
+        }
+
+        // ─── Download results as JSON ──────────────────────────────────────
+        function downloadResults() {
+            if (!currentResults) return;
+            const blob = new Blob([JSON.stringify(currentResults, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `csint_${currentResults.target || 'results'}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
     </script>
 </body>
 </html>
