@@ -5,7 +5,9 @@ Deploys on Render free tier. No database needed.
 """
 
 import os
+import re
 import json
+from urllib.parse import urlparse
 from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
 
@@ -39,6 +41,10 @@ URLHAUS_KEY = os.getenv("URLHAUS_API_KEY", "")
 EMAILREP_KEY = os.getenv("EMAILREP_API_KEY", "")
 
 
+# ============================
+# ROUTES
+# ============================
+
 @app.route("/")
 def index():
     """Main dashboard page."""
@@ -55,7 +61,6 @@ def about():
 # API ENDPOINTS
 # ============================
 
-
 @app.route("/api/ip", methods=["POST"])
 def api_ip():
     """IP Intelligence: geolocation + abuse check + ASN."""
@@ -66,7 +71,6 @@ def api_ip():
         return jsonify({"error": "No target provided"}), 400
 
     # Check if it's a domain (resolve to IP)
-    import re
     ip_pattern = re.compile(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$")
     if not ip_pattern.match(target):
         resolved = resolve_hostname(target)
@@ -96,7 +100,6 @@ def api_dns():
 
     # Strip protocol if present
     if domain.startswith("http"):
-        from urllib.parse import urlparse
         domain = urlparse(domain).hostname or domain
 
     result = {
@@ -142,7 +145,6 @@ def api_domain():
         return jsonify({"error": "No domain provided"}), 400
 
     if domain.startswith("http"):
-        from urllib.parse import urlparse
         domain = urlparse(domain).hostname or domain
 
     result = {
@@ -173,8 +175,6 @@ def api_all():
 
     result = {"target": target, "type": "unknown"}
 
-    import re
-
     # Check if email
     if "@" in target:
         result["type"] = "email"
@@ -204,7 +204,6 @@ def api_all():
     # Domain
     else:
         if target.startswith("http"):
-            from urllib.parse import urlparse
             target = urlparse(target).hostname or target
 
         result["type"] = "domain"
@@ -260,6 +259,10 @@ def api_raw(tool):
 
     return jsonify(func())
 
+
+# ============================
+# ENTRY POINT
+# ============================
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
