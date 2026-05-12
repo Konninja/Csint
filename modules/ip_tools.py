@@ -3,6 +3,9 @@ IP Intelligence Tools (OSINT + CSINT)
 - IP Geolocation via ip-api.com (free, no key)
 - IP Abuse Check via AbuseIPDB (free key required)
 - ASN Lookup via HackerTarget (free, no key, 50/day)
+- IP Risk Score via IPQuery.io (free, no key, no rate limits)
+- Open Ports Scan via HackerTarget (free, no key, 50/day)
+- IP Range Info (CIDR) via ip-api.com
 """
 
 import requests
@@ -92,10 +95,77 @@ def asn_lookup(target: str) -> Dict:
             text = resp.text.strip()
             lines = [l.strip() for l in text.split("\n") if l.strip()]
             result = {"raw": text, "lines": lines}
-            # Parse first line for quick reference
             if lines:
                 result["summary"] = lines[0]
             return result
+        return {"error": f"HTTP {resp.status_code}"}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+def ip_risk_score(ip: str) -> Dict:
+    """
+    IP risk assessment via IPQuery.io.
+    Free, no API key required. No rate limits.
+    Returns risk score, VPN/proxy/TOR detection, and geolocation.
+    """
+    url = f"https://api.ipquery.io/{ip}"
+    try:
+        resp = requests.get(url, timeout=10)
+        if resp.status_code == 200:
+            data = resp.json()
+            return {
+                "ip": data.get("ip"),
+                "risk": {
+                    "score": data.get("risk", {}).get("risk_score", 0),
+                    "is_vpn": data.get("risk", {}).get("is_vpn", False),
+                    "is_tor": data.get("risk", {}).get("is_tor", False),
+                    "is_proxy": data.get("risk", {}).get("is_proxy", False),
+                    "is_mobile": data.get("risk", {}).get("is_mobile", False),
+                    "is_datacenter": data.get("risk", {}).get("is_datacenter", False),
+                },
+                "location": {
+                    "country": data.get("location", {}).get("country"),
+                    "country_code": data.get("location", {}).get("country_code"),
+                    "city": data.get("location", {}).get("city"),
+                    "state": data.get("location", {}).get("state"),
+                    "zipcode": data.get("location", {}).get("zipcode"),
+                    "timezone": data.get("location", {}).get("timezone"),
+                },
+                "isp": data.get("isp", {}),
+            }
+        return {"error": f"HTTP {resp.status_code}"}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+def nmap_ports(ip: str) -> Dict:
+    """
+    Quick open port scan via HackerTarget.
+    Free, no key required. 50 queries/day limit.
+    Returns common open ports and services.
+    """
+    url = f"https://api.hackertarget.com/nmap/?q={ip}"
+    try:
+        resp = requests.get(url, timeout=30)
+        if resp.status_code == 200:
+            text = resp.text.strip()
+            lines = [l.strip() for l in text.split("\n") if l.strip()]
+            ports = []
+            for line in lines:
+                parts = line.split()
+                if len(parts) >= 2 and parts[0].isdigit():
+                    ports.append({
+                        "port": parts[0],
+                        "state": parts[1],
+                        "service": " ".join(parts[2:]) if len(parts) > 2 else "unknown",
+                    })
+            return {
+                "ip": ip,
+                "open_ports": ports,
+                "port_count": len(ports),
+                "raw": text,
+            }
         return {"error": f"HTTP {resp.status_code}"}
     except Exception as e:
         return {"error": str(e)}
